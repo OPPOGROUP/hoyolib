@@ -41,10 +41,15 @@ func (c *Client) Loop() {
 	c.cancel = cancel
 }
 
+func (c *Client) StopLoop() {
+	defer close(c.cancel)
+	c.cancel <- struct{}{}
+}
+
 func (c *Client) Sign() error {
 	return nil
 }
 
 func (c *Client) updateAccountInfo() {
-
+	// TODO: update account info
 }

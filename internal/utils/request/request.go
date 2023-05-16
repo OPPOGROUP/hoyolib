@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-type OptionFunc func(*Request)
+type OptionFunc func(*Request) error
 
 type Request struct {
 	client   *http.Client
-	url      string
+	url      *url.URL
 	method   string
 	params   map[string]string
 	payloads map[string]interface{}
@@ -40,39 +40,49 @@ func NewRequest(opts ...OptionFunc) (*Request, error) {
 	return r, nil
 }
 
-func WithUrl(url string) OptionFunc {
-	return func(request *Request) {
-		request.url = url
+func WithUrl(u string) OptionFunc {
+	return func(request *Request) error {
+		var err error
+		request.url, err = url.Parse(u)
+		return err
 	}
 }
 
 func WithMethod(method string) OptionFunc {
-	return func(request *Request) {
+	return func(request *Request) error {
+		if method != http.MethodPost && method != http.MethodGet {
+			return errors.ErrHttpMethod
+		}
 		request.method = method
+		return nil
 	}
 }
 
 func WithParams(params map[string]string) OptionFunc {
-	return func(request *Request) {
+	return func(request *Request) error {
 		request.params = params
+		return nil
 	}
 }
 
 func WithPayloads(payloads map[string]interface{}) OptionFunc {
-	return func(request *Request) {
+	return func(request *Request) error {
 		request.payloads = payloads
+		return nil
 	}
 }
 
 func WithCookies(cookies map[string]string) OptionFunc {
-	return func(request *Request) {
+	return func(request *Request) error {
 		request.cookies = cookies
+		return nil
 	}
 }
 
 func WithHeaders(headers map[string]string) OptionFunc {
-	return func(request *Request) {
+	return func(request *Request) error {
 		request.headers = headers
+		return nil
 	}
 }
 
@@ -89,8 +99,7 @@ func (r *Request) transformCookies() *cookiejar.Jar {
 		})
 	}
 	jar, _ := cookiejar.New(nil)
-	u, _ := url.Parse(r.url)
-	jar.SetCookies(u, cookies)
+	jar.SetCookies(r.url, cookies)
 	return jar
 }
 
@@ -102,7 +111,7 @@ func (r *Request) Do() (*http.Response, error) {
 		payloads, _ := json.Marshal(r.payloads)
 		pReader = bytes.NewReader(payloads)
 	}
-	req, err := http.NewRequest(r.method, r.url, pReader)
+	req, err := http.NewRequest(r.method, r.url.String(), pReader)
 	if err != nil {
 		return nil, errors.ErrBuildRequest
 	}
