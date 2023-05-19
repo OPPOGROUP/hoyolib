@@ -1,8 +1,11 @@
 package client
 
 import (
+	"encoding/json"
+	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/user"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
+	"io"
 	"time"
 )
 
@@ -47,9 +50,33 @@ func (c *Client) StopLoop() {
 }
 
 func (c *Client) Sign() error {
+	resp, err := c.signRequest.Do()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return errors.ErrHttpCode
+	}
+	body, _ := io.ReadAll(resp.Body)
+	r := new(SignResponse)
+	err = json.Unmarshal(body, r)
+	if err != nil {
+		return errors.ErrJsonDecode
+	}
+	switch r.Retcode {
+	case 0:
+	case -5003:
+	default:
+		return errors.NewInternalError(r.Retcode, r.Message)
+	}
 	return nil
 }
 
 func (c *Client) updateAccountInfo() {
 	// TODO: update account info
+}
+
+func (c *Client) updateSignInfo(isSign bool) {
+	c.userInfo.SetSign(isSign)
 }

@@ -6,6 +6,6 @@ type Info struct {
 	isSign  bool
 }
 
-func (i *Info) setSign(isSign bool) {
+func (i *Info) SetSign(isSign bool) {
 	i.isSign = isSign
 }

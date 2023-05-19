@@ -18,7 +18,8 @@ func NewStarRailClient() (IClient, error) {
 		SignUrl:     "",
 	}}
 	var err error
-	c.signRequest, err = request.NewRequest(request.WithMethod(http.MethodPost),
+	c.signRequest, err = request.NewRequest(
+		request.WithMethod(http.MethodPost),
 		request.WithHeaders(cte.HoyolabHeaders),
 	)
 	if err != nil {

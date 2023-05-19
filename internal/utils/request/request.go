@@ -25,7 +25,10 @@ type Request struct {
 func NewRequest(opts ...OptionFunc) (*Request, error) {
 	r := &Request{}
 	for _, o := range opts {
-		o(r)
+		err := o(r)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if !r.verify() {
 		return nil, errors.ErrRequestParams

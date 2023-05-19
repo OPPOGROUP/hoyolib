@@ -15,6 +15,26 @@ var (
 	logger zerolog.Logger
 )
 
+func GetLogger() zerolog.Logger {
+	return logger.With().Caller().Logger()
+}
+
+func Debug() *zerolog.Event {
+	return logger.Debug()
+}
+
+func Info() *zerolog.Event {
+	return logger.Info()
+}
+
+func Warn() *zerolog.Event {
+	return logger.Warn()
+}
+
+func Error() *zerolog.Event {
+	return logger.Error().Stack()
+}
+
 func Init() error {
 	level, err := zerolog.ParseLevel(viper.GetString("log.level"))
 	if err != nil {
@@ -49,13 +69,13 @@ func Init() error {
 			return fmt.Sprintf("%s", i)
 		}
 		consoleWriter.FormatFieldName = func(i interface{}) string {
-			return fmt.Sprintf("%s: ", i)
+			return fmt.Sprintf("[ %s: ", i)
 		}
 		consoleWriter.FormatFieldValue = func(i interface{}) string {
-			return fmt.Sprintf("%s", i)
+			return fmt.Sprintf("%s ]", i)
 		}
 		writer = zerolog.MultiLevelWriter(logFile, consoleWriter)
 	}
-	logger = zerolog.New(writer).Level(level)
+	logger = zerolog.New(writer).Level(level).With().Timestamp().Logger()
 	return nil
 }
