@@ -1,0 +1,4 @@
+env: dev
+log:
+  path: ./log
+  level: debug
