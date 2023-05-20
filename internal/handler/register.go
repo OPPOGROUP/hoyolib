@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OPPOGROUP/hoyolib/internal/client"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
+	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
 )
 
@@ -19,6 +20,8 @@ var (
 )
 
 func (HoyolibServer) Register(ctx context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
+	log.Debug().Msgf("Register request: %+v", req)
+	defer log.Debug().Msgf("Register response: %+v", req)
 	resp := &hoyolib_pb.RegisterResponse{}
 	if err := verifyRegisterRequest(req); err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
