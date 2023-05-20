@@ -7,11 +7,11 @@ import (
 )
 
 type StarRail struct {
-	Client
+	client
 }
 
-func NewStarRailClient() (IClient, error) {
-	c := &StarRail{Client{
+func NewStarRailClient() (Client, error) {
+	c := &StarRail{client{
 		Api:         "",
 		ActId:       "",
 		SignInfoUrl: "",
@@ -20,10 +20,14 @@ func NewStarRailClient() (IClient, error) {
 	var err error
 	c.signRequest, err = request.NewRequest(
 		request.WithMethod(http.MethodPost),
-		request.WithHeaders(cte.HoyolabHeaders),
+		request.WithHeaders(cte.GetHeaders(true)),
 	)
 	if err != nil {
 		return nil, err
 	}
 	return c, nil
+}
+
+func (c *StarRail) Init() {
+
 }

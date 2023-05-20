@@ -24,23 +24,24 @@ type Request struct {
 
 func NewRequest(opts ...OptionFunc) (*Request, error) {
 	r := &Request{}
+	err := r.Apply(opts...)
+	if err != nil {
+		return nil, err
+	}
+	r.client = &http.Client{
+		Timeout: 2 * time.Second,
+	}
+	return r, nil
+}
+
+func (r *Request) Apply(opts ...OptionFunc) error {
 	for _, o := range opts {
 		err := o(r)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	if !r.verify() {
-		return nil, errors.ErrRequestParams
-	}
-	cookies := r.transformCookies()
-	r.client = &http.Client{
-		Transport:     nil,
-		CheckRedirect: nil,
-		Jar:           cookies,
-		Timeout:       2 * time.Second,
-	}
-	return r, nil
+	return nil
 }
 
 func WithUrl(u string) OptionFunc {
@@ -78,6 +79,7 @@ func WithPayloads(payloads map[string]interface{}) OptionFunc {
 func WithCookies(cookies map[string]string) OptionFunc {
 	return func(request *Request) error {
 		request.cookies = cookies
+		request.client.Jar = request.transformCookies()
 		return nil
 	}
 }

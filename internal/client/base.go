@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-type IClient interface {
+type Client interface {
 	Sign() error
 }
 
-type Client struct {
+type client struct {
 	Api                string
 	ActId              string
 	SignInfoUrl        string
@@ -25,7 +25,7 @@ type Client struct {
 	cancel             chan struct{}
 }
 
-func (c *Client) Loop() {
+func (c *client) Loop() {
 	cancel := make(chan struct{}, 1)
 	c.updateAccountInfo()
 
@@ -44,12 +44,12 @@ func (c *Client) Loop() {
 	c.cancel = cancel
 }
 
-func (c *Client) StopLoop() {
+func (c *client) StopLoop() {
 	defer close(c.cancel)
 	c.cancel <- struct{}{}
 }
 
-func (c *Client) Sign() error {
+func (c *client) Sign() error {
 	resp, err := c.signRequest.Do()
 	if err != nil {
 		return err
@@ -73,10 +73,10 @@ func (c *Client) Sign() error {
 	return nil
 }
 
-func (c *Client) updateAccountInfo() {
+func (c *client) updateAccountInfo() {
 	// TODO: update account info
 }
 
-func (c *Client) updateSignInfo(isSign bool) {
+func (c *client) updateSignInfo(isSign bool) {
 	c.userInfo.SetSign(isSign)
 }

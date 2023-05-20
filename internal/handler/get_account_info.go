@@ -1,4 +1,4 @@
-package grpc
+package handler
 
 import (
 	"context"
@@ -7,6 +7,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (HoyolibService) GetAccountInfo(context.Context, *hoyolib_pb.AccountInfoRequest) (*hoyolib_pb.AccountInfoResponse, error) {
+func (HoyolibServer) GetAccountInfo(context.Context, *hoyolib_pb.AccountInfoRequest) (*hoyolib_pb.AccountInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAccountInfo not implemented")
 }

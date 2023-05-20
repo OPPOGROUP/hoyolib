@@ -12,7 +12,7 @@ const (
 )
 
 func Init() error {
-	viper.AddConfigPath("../configs")
+	viper.AddConfigPath("./configs")
 	viper.SetConfigName(config_name)
 	viper.SetConfigType(config_type)
 
@@ -27,6 +27,7 @@ func Init() error {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Info().Str("name", e.Name).Str("string", e.String()).Msg("Config file update triggered")
 	})
+	log.Info().Msg("Config init success")
 
 	return nil
 }
