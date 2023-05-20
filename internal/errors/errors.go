@@ -17,6 +17,7 @@ var (
 	ErrInvalidCookieToken = errors.New("invalid cookie token")
 	ErrInvalidAccountType = errors.New("invalid account type")
 	ErrEmptyGames         = errors.New("empty games")
+	ErrInvalidGameType    = errors.New("invalid game type")
 )
 
 func NewInternalError(code int, msg string) error {

@@ -10,7 +10,7 @@ type StarRail struct {
 	client
 }
 
-func NewStarRailClient() (Client, error) {
+func NewStarRailClient(oversea bool) (Client, error) {
 	c := &StarRail{client{
 		Api:         "",
 		ActId:       "",
@@ -20,7 +20,7 @@ func NewStarRailClient() (Client, error) {
 	var err error
 	c.signRequest, err = request.NewRequest(
 		request.WithMethod(http.MethodPost),
-		request.WithHeaders(cte.GetHeaders(true)),
+		request.WithHeaders(cte.GetHeaders(oversea)),
 	)
 	if err != nil {
 		return nil, err

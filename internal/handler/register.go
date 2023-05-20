@@ -19,14 +19,35 @@ var (
 )
 
 func (HoyolibServer) Register(ctx context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
-	if err := verifyRegisterRequest(req); err != nil {
-		return nil, err
-	}
 	resp := &hoyolib_pb.RegisterResponse{}
+	if err := verifyRegisterRequest(req); err != nil {
+		resp.Header = &hoyolib_pb.ResponseHeader{
+			Code:    int32(hoyolib_pb.ErrorCode_INVALID_REQUEST_PARAM),
+			Message: err.Error(),
+		}
+		return resp, nil
+	}
+	var oversea = false
+	if req.GetAccountType() == hoyolib_pb.RegisterRequest_OVERSEA {
+		oversea = true
+	}
+	uid, err := createUser(req, oversea)
+	if err != nil {
+		resp.Header = &hoyolib_pb.ResponseHeader{
+			Code:    int32(hoyolib_pb.ErrorCode_ERROR_CREATE_USER),
+			Message: err.Error(),
+		}
+		return resp, nil
+	}
+
+	resp.Header = &hoyolib_pb.ResponseHeader{
+		Code:   int32(hoyolib_pb.ErrorCode_OK),
+		UserId: uid,
+	}
 	return resp, nil
 }
 
-func createUser(req *hoyolib_pb.RegisterRequest) {
+func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 	u := req.GetUserId()
 	if u == 0 {
 		u = uid
@@ -35,13 +56,26 @@ func createUser(req *hoyolib_pb.RegisterRequest) {
 	info := &uInfo{
 		AccountId:   req.AccountId,
 		CookieToken: req.CookieToken,
+		Clients:     []client.Client{},
 	}
 	for _, g := range req.GetGames() {
 		switch g {
 		case hoyolib_pb.GameType_Genshin:
+			c, err := client.NewGenshinClient(oversea)
+			if err != nil {
+				return 0, err
+			}
+			info.Clients = append(info.Clients, c)
+		case hoyolib_pb.GameType_StarRail:
+			c, err := client.NewStarRailClient(oversea)
+			if err != nil {
+				return 0, err
+			}
+			info.Clients = append(info.Clients, c)
 		}
 	}
 	m[u] = info
+	return u, nil
 }
 
 func verifyRegisterRequest(req *hoyolib_pb.RegisterRequest) error {
@@ -59,6 +93,11 @@ func verifyRegisterRequest(req *hoyolib_pb.RegisterRequest) error {
 	}
 	if len(req.GetGames()) == 0 {
 		return errors.ErrEmptyGames
+	}
+	for _, g := range req.GetGames() {
+		if hoyolib_pb.GameType_name[int32(g)] == "" {
+			return errors.ErrInvalidGameType
+		}
 	}
 	return nil
 }
