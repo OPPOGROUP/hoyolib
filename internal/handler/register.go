@@ -11,7 +11,7 @@ import (
 type uInfo struct {
 	AccountId   string
 	CookieToken string
-	Clients     []client.Client
+	Clients     map[int32]client.Client
 }
 
 var (
@@ -20,9 +20,10 @@ var (
 )
 
 func (HoyolibServer) Register(ctx context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
-	log.Debug().Msgf("Register request: %+v", req)
-	defer log.Debug().Msgf("Register response: %+v", req)
 	resp := &hoyolib_pb.RegisterResponse{}
+	log.Debug().Msgf("Register request: %+v", req)
+	defer log.Debug().Msgf("Register response: %+v", resp)
+
 	if err := verifyRegisterRequest(req); err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
 			Code:    int32(hoyolib_pb.ErrorCode_INVALID_REQUEST_PARAM),
@@ -59,7 +60,7 @@ func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 	info := &uInfo{
 		AccountId:   req.AccountId,
 		CookieToken: req.CookieToken,
-		Clients:     []client.Client{},
+		Clients:     make(map[int32]client.Client),
 	}
 	for _, g := range req.GetGames() {
 		switch g {
@@ -68,13 +69,13 @@ func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 			if err != nil {
 				return 0, err
 			}
-			info.Clients = append(info.Clients, c)
+			info.Clients[int32(g)] = c
 		case hoyolib_pb.GameType_StarRail:
-			c, err := client.NewStarRailClient(oversea)
+			c, err := client.NewStarRailClient(oversea, req.AccountId, req.CookieToken)
 			if err != nil {
 				return 0, err
 			}
-			info.Clients = append(info.Clients, c)
+			info.Clients[int32(g)] = c
 		}
 	}
 	m[u] = info

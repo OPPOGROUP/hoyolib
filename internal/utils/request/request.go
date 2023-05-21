@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
+	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -126,6 +127,7 @@ func (r *Request) Do() (*http.Response, error) {
 			q.Add(key, value)
 		}
 	}
+	log.Debug().Any("request", req).Msg("request")
 	resp, err := r.client.Do(req)
 	if err != nil {
 		return nil, errors.ErrSendRequest

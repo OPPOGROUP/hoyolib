@@ -14,10 +14,6 @@ type Client interface {
 }
 
 type client struct {
-	Api                string
-	ActId              string
-	SignInfoUrl        string
-	SignUrl            string
 	userInfo           *user.Info
 	accountInfoRequest *request.Request
 	signInfoRequest    *request.Request
