@@ -24,13 +24,14 @@ type Request struct {
 }
 
 func NewRequest(opts ...OptionFunc) (*Request, error) {
-	r := &Request{}
+	r := &Request{
+		client: &http.Client{
+			Timeout: 2 * time.Second,
+		},
+	}
 	err := r.Apply(opts...)
 	if err != nil {
 		return nil, err
-	}
-	r.client = &http.Client{
-		Timeout: 2 * time.Second,
 	}
 	return r, nil
 }
