@@ -20,6 +20,7 @@ var (
 	ErrInvalidGameType          = errors.New("invalid game type")
 	ErrInvalidUserId            = errors.New("invalid user id")
 	ErrInvalidUserNotRegistered = errors.New("invalid user not registered")
+	ErrNotImplemented           = errors.New("not implemented")
 )
 
 func NewInternalError(code int, msg string) error {

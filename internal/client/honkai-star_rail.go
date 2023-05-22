@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/cte"
+	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
 	"net/http"
 )
@@ -31,6 +32,7 @@ func NewStarRailClient(oversea bool, accountId, cookieToken string) (Client, err
 		signUrl = fmt.Sprintf("%s/event/luna/sign", api)
 	} else {
 		// todo: add mainland china api
+		return nil, errors.ErrNotImplemented
 	}
 	c.accountInfoRequest, err = request.NewRequest(
 		request.WithMethod(http.MethodGet),

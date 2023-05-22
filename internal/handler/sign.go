@@ -7,12 +7,19 @@ import (
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
 )
 
-func (HoyolibServer) Sign(ctx context.Context, req *hoyolib_pb.SignRequest) (*hoyolib_pb.SignResponse, error) {
-	resp := &hoyolib_pb.SignResponse{}
+func (HoyolibServer) CheckIn(ctx context.Context, req *hoyolib_pb.CheckInRequest) (*hoyolib_pb.CheckInResponse, error) {
+	resp := &hoyolib_pb.CheckInResponse{
+		Header: &hoyolib_pb.ResponseHeader{
+			Code:   int32(hoyolib_pb.ErrorCode_OK),
+			UserId: req.GetUserId(),
+		},
+		CheckInInfoCN:      make(map[int32]*hoyolib_pb.CheckInResponse_CheckInStatus),
+		CheckInInfoOversea: make(map[int32]*hoyolib_pb.CheckInResponse_CheckInStatus),
+	}
 	log.Debug().Msgf("Sign request: %+v", req)
 	defer log.Debug().Msgf("Sign response: %+v", resp)
 
-	if err := verifySignRequest(req); err != nil {
+	if err := verifyCheckInRequest(req); err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
 			Code:    int32(hoyolib_pb.ErrorCode_INVALID_REQUEST_PARAM),
 			Message: err.Error(),
@@ -26,12 +33,42 @@ func (HoyolibServer) Sign(ctx context.Context, req *hoyolib_pb.SignRequest) (*ho
 		}
 		return resp, nil
 	} else {
+		for gid, c := range u.ClientsCN {
+			err := c.CheckIn()
+			if err != nil {
+				resp.CheckInInfoCN[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+					Success: false,
+					Msg:     err.Error(),
+				}
+			} else {
+				resp.CheckInInfoCN[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+					Success: true,
+				}
+			}
+		}
+		for gid, c := range u.ClientsOversea {
+			err := c.CheckIn()
+			if err != nil {
+				resp.CheckInInfoOversea[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+					Success: false,
+					Msg:     err.Error(),
+				}
+			} else {
+				resp.CheckInInfoOversea[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+					Success: true,
+				}
+			}
+		}
+		resp.Header = &hoyolib_pb.ResponseHeader{
+			Code:   int32(hoyolib_pb.ErrorCode_OK),
+			UserId: req.GetUserId(),
+		}
 
 	}
 	return resp, nil
 }
 
-func verifySignRequest(req *hoyolib_pb.SignRequest) error {
+func verifyCheckInRequest(req *hoyolib_pb.CheckInRequest) error {
 	if req == nil {
 		return errors.ErrInvalidRequest
 	}

@@ -11,12 +11,7 @@ type GenshinClient struct {
 }
 
 func NewGenshinClient(oversea bool) (Client, error) {
-	c := &GenshinClient{client{
-		Api:         "",
-		ActId:       "",
-		SignInfoUrl: "",
-		SignUrl:     "",
-	}}
+	c := &GenshinClient{client{}}
 	var err error
 	c.signRequest, err = request.NewRequest(
 		request.WithMethod(http.MethodPost),

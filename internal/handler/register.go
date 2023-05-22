@@ -9,9 +9,10 @@ import (
 )
 
 type uInfo struct {
-	AccountId   string
-	CookieToken string
-	Clients     map[int32]client.Client
+	AccountId      string
+	CookieToken    string
+	ClientsCN      map[int32]client.Client
+	ClientsOversea map[int32]client.Client
 }
 
 var (
@@ -58,24 +59,32 @@ func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 		uid++
 	}
 	info := &uInfo{
-		AccountId:   req.AccountId,
-		CookieToken: req.CookieToken,
-		Clients:     make(map[int32]client.Client),
+		AccountId:      req.AccountId,
+		CookieToken:    req.CookieToken,
+		ClientsCN:      make(map[int32]client.Client),
+		ClientsOversea: make(map[int32]client.Client),
 	}
 	for _, g := range req.GetGames() {
+		var (
+			c   client.Client
+			err error
+		)
 		switch g {
 		case hoyolib_pb.GameType_Genshin:
-			c, err := client.NewGenshinClient(oversea)
+			c, err = client.NewGenshinClient(oversea)
 			if err != nil {
 				return 0, err
 			}
-			info.Clients[int32(g)] = c
 		case hoyolib_pb.GameType_StarRail:
-			c, err := client.NewStarRailClient(oversea, req.AccountId, req.CookieToken)
+			c, err = client.NewStarRailClient(oversea, req.AccountId, req.CookieToken)
 			if err != nil {
 				return 0, err
 			}
-			info.Clients[int32(g)] = c
+		}
+		if oversea {
+			info.ClientsOversea[int32(g)] = c
+		} else {
+			info.ClientsCN[int32(g)] = c
 		}
 	}
 	m[u] = info

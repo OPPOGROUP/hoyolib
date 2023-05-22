@@ -10,7 +10,7 @@ import (
 )
 
 type Client interface {
-	Sign() error
+	CheckIn() error
 }
 
 type client struct {
@@ -45,7 +45,7 @@ func (c *client) StopLoop() {
 	c.cancel <- struct{}{}
 }
 
-func (c *client) Sign() error {
+func (c *client) CheckIn() error {
 	resp, err := c.signRequest.Do()
 	if err != nil {
 		return err
