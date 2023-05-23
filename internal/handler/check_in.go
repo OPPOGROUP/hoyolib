@@ -67,7 +67,6 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 			Code:   int32(hoyolib_pb.ErrorCode_OK),
 			UserId: req.GetUserId(),
 		}
-
 	}
 	return resp, nil
 }
