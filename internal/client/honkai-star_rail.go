@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/cte"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
+	"github.com/OPPOGROUP/hoyolib/internal/utils"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
 	"net/http"
 )
@@ -26,10 +27,10 @@ func NewStarRailClient(oversea bool, accountId, cookieToken string) (Client, err
 	if oversea {
 		accountApi = "https://bbs-api-os.hoyolab.com"
 		api = "https://sg-public-api.hoyolab.com"
+		mark := "luna"
 		actId = "e202303301540311"
 		accountInfoUrl = fmt.Sprintf("%s/game_record/card/api/getGameRecordCard", accountApi)
-		signInfoUrl = fmt.Sprintf("%s/event/luna/info", api)
-		signUrl = fmt.Sprintf("%s/event/luna/sign", api)
+		signUrl, signInfoUrl = utils.GetSignUrl(api, mark)
 	} else {
 		// todo: add mainland china api
 		return nil, errors.ErrNotImplemented
