@@ -1,3 +1,6 @@
 .PHONY : build
 build :
 	go build -v -race -o ./bin/ ./...
+.PHONY : release
+release :
+	go build -v -ldflags "-w -s" -o ./bin/ ./...
