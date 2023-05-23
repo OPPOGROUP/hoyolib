@@ -26,7 +26,7 @@ func NewGenshinClient(oversea bool, accountId, cookieToken string) (Client, erro
 	)
 	if oversea {
 		accountApi = "https://bbs-api-os.hoyolab.com"
-		api = "https://sg-hk4e-api.hoyolab.com"
+		api = "https://sg-public-api.hoyolab.com"
 		mark := "sol"
 		actId = "e202102251931481"
 		accountInfoUrl = fmt.Sprintf("%s/game_record/card/api/getGameRecordCard", accountApi)
