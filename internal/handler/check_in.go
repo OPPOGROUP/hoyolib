@@ -16,8 +16,8 @@ func (HoyolibServer) CheckIn(ctx context.Context, req *hoyolib_pb.CheckInRequest
 		CheckInInfoCN:      make(map[int32]*hoyolib_pb.CheckInResponse_CheckInStatus),
 		CheckInInfoOversea: make(map[int32]*hoyolib_pb.CheckInResponse_CheckInStatus),
 	}
-	log.Debug().Msgf("Sign request: %+v", req)
-	defer log.Debug().Msgf("Sign response: %+v", resp)
+	log.Debug().Msgf("Check-in request: %+v", req)
+	defer log.Debug().Msgf("Check-in response: %+v", resp)
 
 	if err := verifyCheckInRequest(req); err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
