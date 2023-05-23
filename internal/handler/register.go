@@ -20,7 +20,7 @@ var (
 	uid int64 = 100000
 )
 
-func (HoyolibServer) Register(ctx context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
+func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
 	resp := &hoyolib_pb.RegisterResponse{}
 	log.Debug().Msgf("Register request: %+v", req)
 	defer log.Debug().Msgf("Register response: %+v", resp)
