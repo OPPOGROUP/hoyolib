@@ -78,7 +78,7 @@ func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 		)
 		switch g {
 		case hoyolib_pb.GameType_Genshin:
-			c, err = client.NewGenshinClient(oversea)
+			c, err = client.NewGenshinClient(oversea, req.AccountId, req.CookieToken)
 			if err != nil {
 				return 0, err
 			}
