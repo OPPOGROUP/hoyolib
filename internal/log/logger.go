@@ -16,7 +16,7 @@ var (
 )
 
 func GetLogger() zerolog.Logger {
-	return logger.With().Caller().Logger()
+	return logger
 }
 
 func Debug() *zerolog.Event {
@@ -76,6 +76,6 @@ func Init() error {
 		}
 		writer = zerolog.MultiLevelWriter(logFile, consoleWriter)
 	}
-	logger = zerolog.New(writer).Level(level).With().Timestamp().Logger()
+	logger = zerolog.New(writer).Level(level).With().Timestamp().Caller().Logger()
 	return nil
 }
