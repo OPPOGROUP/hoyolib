@@ -60,10 +60,7 @@ func (c *client) CheckIn() error {
 	if err != nil {
 		return errors.ErrJsonDecode
 	}
-	switch r.Retcode {
-	case 0:
-	case -5003:
-	default:
+	if r.Retcode != 0 {
 		return errors.NewInternalError(r.Retcode, r.Message)
 	}
 	return nil
