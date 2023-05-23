@@ -14,7 +14,7 @@ type GenshinClient struct {
 }
 
 func NewGenshinClient(oversea bool, accountId, cookieToken string) (Client, error) {
-	c := &StarRail{client{}}
+	c := &GenshinClient{client{}}
 	var err error
 	var (
 		accountApi     string
