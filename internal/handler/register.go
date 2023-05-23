@@ -21,7 +21,12 @@ var (
 )
 
 func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
-	resp := &hoyolib_pb.RegisterResponse{}
+	resp := &hoyolib_pb.RegisterResponse{
+		Header: &hoyolib_pb.ResponseHeader{
+			Code:   int32(hoyolib_pb.ErrorCode_OK),
+			UserId: req.GetUserId(),
+		},
+	}
 	log.Debug().Msgf("Register request: %+v", req)
 	defer log.Debug().Msgf("Register response: %+v", resp)
 
@@ -30,24 +35,26 @@ func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest
 			Code:    int32(hoyolib_pb.ErrorCode_INVALID_REQUEST_PARAM),
 			Message: err.Error(),
 		}
+		log.Error().Err(err).Msg("Register request verification failed")
 		return resp, nil
 	}
 	var oversea = false
 	if req.GetAccountType() == hoyolib_pb.RegisterRequest_OVERSEA {
 		oversea = true
 	}
-	uid, err := createUser(req, oversea)
+	_uid, err := createUser(req, oversea)
 	if err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
 			Code:    int32(hoyolib_pb.ErrorCode_ERROR_CREATE_USER),
 			Message: err.Error(),
 		}
+		log.Error().Err(err).Msg("Create user failed")
 		return resp, nil
 	}
 
 	resp.Header = &hoyolib_pb.ResponseHeader{
 		Code:   int32(hoyolib_pb.ErrorCode_OK),
-		UserId: uid,
+		UserId: _uid,
 	}
 	return resp, nil
 }

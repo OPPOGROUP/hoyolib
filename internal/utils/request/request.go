@@ -3,7 +3,6 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"net/http"
@@ -129,7 +128,7 @@ func (r *Request) Do() (*http.Response, error) {
 			q.Add(key, value)
 		}
 	}
-	log.Debug().Msg(fmt.Sprintf("[http request] request = %v", req))
+	log.Debug().Msgf("[http request] request = %v", req)
 	resp, err := r.client.Do(req)
 	if err != nil {
 		return nil, errors.ErrSendRequest

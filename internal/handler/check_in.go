@@ -24,13 +24,15 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 			Code:    int32(hoyolib_pb.ErrorCode_INVALID_REQUEST_PARAM),
 			Message: err.Error(),
 		}
+		log.Error().Err(err).Msg("Check-in request verification failed")
 		return resp, nil
 	}
 	if u, ok := m[req.GetUserId()]; !ok {
 		resp.Header = &hoyolib_pb.ResponseHeader{
 			Code:    int32(hoyolib_pb.ErrorCode_ERROR_USER_NOT_REGISTER),
-			Message: errors.ErrInvalidUserNotRegistered.Error(),
+			Message: errors.ErrUserNotRegistered.Error(),
 		}
+		log.Error().Err(errors.ErrUserNotRegistered).Msg("Check-in request verification failed")
 		return resp, nil
 	} else {
 		for gid, c := range u.ClientsCN {
@@ -40,6 +42,7 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 					Success: false,
 					Msg:     err.Error(),
 				}
+				log.Error().Err(err).Str("server", "CN").Int32("game_id", gid).Msg("Check-in failed")
 			} else {
 				resp.CheckInInfoCN[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: true,
@@ -53,6 +56,7 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 					Success: false,
 					Msg:     err.Error(),
 				}
+				log.Error().Err(err).Str("server", "Oversea").Int32("game_id", gid).Msg("Check-in failed")
 			} else {
 				resp.CheckInInfoOversea[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: true,
