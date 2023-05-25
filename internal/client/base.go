@@ -5,6 +5,7 @@ import (
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/user"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
+	"github.com/rs/zerolog/log"
 	"io"
 	"time"
 )
@@ -52,6 +53,7 @@ func (c *client) CheckIn() error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
+		log.Error().Msgf("http code: %d", resp.StatusCode)
 		return errors.ErrHttpCode
 	}
 	body, _ := io.ReadAll(resp.Body)

@@ -111,6 +111,7 @@ func (r *Request) transformCookies() *cookiejar.Jar {
 }
 
 func (r *Request) Do() (*http.Response, error) {
+	log.Debug().Msgf("[http request] request = %+v", r)
 	var (
 		pReader *bytes.Reader
 	)
@@ -128,7 +129,6 @@ func (r *Request) Do() (*http.Response, error) {
 			q.Add(key, value)
 		}
 	}
-	log.Debug().Msgf("[http request] request = %v", req)
 	resp, err := r.client.Do(req)
 	if err != nil {
 		return nil, errors.ErrSendRequest

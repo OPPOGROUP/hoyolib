@@ -71,6 +71,10 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 	return resp, nil
 }
 
+func checkInUser(userid int32) error {
+	return nil
+}
+
 func verifyCheckInRequest(req *hoyolib_pb.CheckInRequest) error {
 	if req == nil {
 		return errors.ErrInvalidRequest
