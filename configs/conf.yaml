@@ -1,4 +1,6 @@
 env: dev
+data:
+  path: ./data
 log:
   path: ./log
   level: debug

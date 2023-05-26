@@ -5,19 +5,8 @@ import (
 	"github.com/OPPOGROUP/hoyolib/internal/client"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/log"
+	"github.com/OPPOGROUP/hoyolib/internal/user"
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
-)
-
-type uInfo struct {
-	AccountId      string
-	CookieToken    string
-	ClientsCN      map[int32]client.Client
-	ClientsOversea map[int32]client.Client
-}
-
-var (
-	m         = make(map[int64]*uInfo)
-	uid int64 = 100000
 )
 
 func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
@@ -38,11 +27,7 @@ func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest
 		log.Error().Err(err).Msg("Register request verification failed")
 		return resp, nil
 	}
-	var oversea = false
-	if req.GetAccountType() == hoyolib_pb.RegisterRequest_OVERSEA {
-		oversea = true
-	}
-	_uid, err := createUser(req, oversea)
+	_uid, err := createUser(req, req.GetAccountType())
 	if err != nil {
 		resp.Header = &hoyolib_pb.ResponseHeader{
 			Code:    int32(hoyolib_pb.ErrorCode_ERROR_CREATE_USER),
@@ -59,17 +44,16 @@ func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest
 	return resp, nil
 }
 
-func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
+func createUser(req *hoyolib_pb.RegisterRequest, server hoyolib_pb.RegisterRequest_AccountType) (int64, error) {
 	u := req.GetUserId()
 	if u == 0 {
 		u = uid
 		uid++
 	}
-	info := &uInfo{
-		AccountId:      req.AccountId,
-		CookieToken:    req.CookieToken,
-		ClientsCN:      make(map[int32]client.Client),
-		ClientsOversea: make(map[int32]client.Client),
+	info := &user.Info{
+		AccountId:   req.AccountId,
+		CookieToken: req.CookieToken,
+		Clients:     make(map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]client.Client),
 	}
 	for _, g := range req.GetGames() {
 		var (
@@ -78,23 +62,30 @@ func createUser(req *hoyolib_pb.RegisterRequest, oversea bool) (int64, error) {
 		)
 		switch g {
 		case hoyolib_pb.GameType_Genshin:
-			c, err = client.NewGenshinClient(oversea, req.AccountId, req.CookieToken)
+			c, err = client.NewGenshinClient(server, req.AccountId, req.CookieToken)
 			if err != nil {
 				return 0, err
 			}
 		case hoyolib_pb.GameType_StarRail:
-			c, err = client.NewStarRailClient(oversea, req.AccountId, req.CookieToken)
+			c, err = client.NewStarRailClient(server, req.AccountId, req.CookieToken)
 			if err != nil {
 				return 0, err
 			}
 		}
-		if oversea {
-			info.ClientsOversea[int32(g)] = c
-		} else {
-			info.ClientsCN[int32(g)] = c
+		if info.Clients[server] == nil {
+			info.Clients[server] = make(map[hoyolib_pb.GameType]client.Client)
 		}
+		info.Clients[server][g] = c
 	}
 	m[u] = info
+	go func() {
+		err := saveUser()
+		if err != nil {
+			log.Error().Err(err).Msg("Save user failed")
+			return
+		}
+		log.Info().Msgf("Save user %d success", u)
+	}()
 	return u, nil
 }
 
@@ -108,14 +99,14 @@ func verifyRegisterRequest(req *hoyolib_pb.RegisterRequest) error {
 	if req.CookieToken == "" {
 		return errors.ErrInvalidCookieToken
 	}
-	if hoyolib_pb.RegisterRequest_AccountType_name[int32(req.AccountType)] == "" {
+	if hoyolib_pb.RegisterRequest_AccountType_name[int32(req.AccountType)] == "" || req.AccountType == hoyolib_pb.RegisterRequest_UNKNOWN {
 		return errors.ErrInvalidAccountType
 	}
 	if len(req.GetGames()) == 0 {
 		return errors.ErrEmptyGames
 	}
 	for _, g := range req.GetGames() {
-		if hoyolib_pb.GameType_name[int32(g)] == "" {
+		if hoyolib_pb.GameType_name[int32(g)] == "" || g == hoyolib_pb.GameType_UNKNOWN_GAME {
 			return errors.ErrInvalidGameType
 		}
 	}

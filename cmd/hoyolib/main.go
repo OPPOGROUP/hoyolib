@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	handler.LoadSavedUsers()
 	if err = startServer(); err != nil {
 		panic(err)
 	}

@@ -2,12 +2,12 @@ package client
 
 import (
 	"encoding/json"
+	"github.com/OPPOGROUP/hoyolib/internal/cte"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
-	"github.com/OPPOGROUP/hoyolib/internal/user"
+	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
-	"github.com/rs/zerolog/log"
+	"github.com/OPPOGROUP/protocol/hoyolib_pb"
 	"io"
-	"time"
 )
 
 type Client interface {
@@ -15,35 +15,12 @@ type Client interface {
 }
 
 type client struct {
-	userInfo           *user.Info
+	userInfo           *gameInfo
+	server             hoyolib_pb.RegisterRequest_AccountType
+	game               hoyolib_pb.GameType
 	accountInfoRequest *request.Request
 	signInfoRequest    *request.Request
 	signRequest        *request.Request
-	cancel             chan struct{}
-}
-
-func (c *client) Loop() {
-	cancel := make(chan struct{}, 1)
-	c.updateAccountInfo()
-
-	tick := time.NewTicker(1 * time.Hour)
-	go func(cancel chan struct{}) {
-		defer tick.Stop()
-		for range tick.C {
-			select {
-			case <-cancel:
-				return
-			default:
-				c.updateAccountInfo()
-			}
-		}
-	}(cancel)
-	c.cancel = cancel
-}
-
-func (c *client) StopLoop() {
-	defer close(c.cancel)
-	c.cancel <- struct{}{}
 }
 
 func (c *client) CheckIn() error {
@@ -52,11 +29,11 @@ func (c *client) CheckIn() error {
 		return err
 	}
 	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		log.Error().Msgf("http code: %d", resp.StatusCode)
+		log.Error().Msgf("http code = %d, body = %s", resp.StatusCode, string(body))
 		return errors.ErrHttpCode
 	}
-	body, _ := io.ReadAll(resp.Body)
 	r := new(SignResponse)
 	err = json.Unmarshal(body, r)
 	if err != nil {
@@ -68,10 +45,39 @@ func (c *client) CheckIn() error {
 	return nil
 }
 
-func (c *client) updateAccountInfo() {
-	// TODO: update account info
-}
-
-func (c *client) updateSignInfo(isSign bool) {
-	c.userInfo.SetSign(isSign)
+func (c *client) updateAccountInfo() error {
+	resp, err := c.accountInfoRequest.Do()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		log.Error().Msgf("http code = %d, body = %s", resp.StatusCode, string(body))
+		return errors.ErrHttpCode
+	}
+	r := new(AccountInfoResponse)
+	err = json.Unmarshal(body, r)
+	if err != nil {
+		return errors.ErrJsonDecode
+	}
+	if r.Retcode != 0 {
+		return errors.NewInternalError(r.Retcode, r.Message)
+	}
+	gameType := cte.LocalGameTypeToMihoyoGameType[c.game]
+	for _, data := range r.Data.List {
+		data := data
+		if data.GameId == gameType {
+			userInfo := &gameInfo{
+				GameRoleId: data.GameRoleId,
+				Region:     data.Region,
+				Nickname:   data.Nickname,
+				Level:      data.Level,
+				Data:       data.Data,
+			}
+			c.userInfo = userInfo
+			break
+		}
+	}
+	return nil
 }

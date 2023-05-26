@@ -2,10 +2,18 @@ package cte
 
 import (
 	"fmt"
+	"github.com/OPPOGROUP/protocol/hoyolib_pb"
+)
+
+const (
+	UserDataFile = "user.json"
 )
 
 var (
-	userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) %s"
+	userAgent                     = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) %s"
+	LocalGameTypeToMihoyoGameType = map[hoyolib_pb.GameType]int{
+		hoyolib_pb.GameType_Genshin: 2,
+	}
 )
 
 func GetHeaders(oversea bool) map[string]string {

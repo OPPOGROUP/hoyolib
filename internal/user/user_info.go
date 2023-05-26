@@ -1,11 +1,12 @@
 package user
 
-type Info struct {
-	Uid     int64
-	GameUid int64
-	isSign  bool
-}
+import (
+	"github.com/OPPOGROUP/hoyolib/internal/client"
+	"github.com/OPPOGROUP/protocol/hoyolib_pb"
+)
 
-func (i *Info) SetSign(isSign bool) {
-	i.isSign = isSign
+type Info struct {
+	AccountId   string                                                                           `json:"account_id"`
+	CookieToken string                                                                           `json:"cookie_token"`
+	Clients     map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]client.Client `json:"-"`
 }

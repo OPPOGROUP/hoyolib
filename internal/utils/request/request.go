@@ -121,6 +121,7 @@ func (r *Request) Do() (*http.Response, error) {
 	}
 	req, err := http.NewRequest(r.method, r.url.String(), pReader)
 	if err != nil {
+		log.Error().Err(err).Msgf("[http request] build request error")
 		return nil, errors.ErrBuildRequest
 	}
 	if r.params != nil {
@@ -131,6 +132,7 @@ func (r *Request) Do() (*http.Response, error) {
 	}
 	resp, err := r.client.Do(req)
 	if err != nil {
+		log.Error().Err(err).Msgf("[http request] send request error")
 		return nil, errors.ErrSendRequest
 	}
 	return resp, nil

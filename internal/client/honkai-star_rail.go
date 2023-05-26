@@ -6,6 +6,7 @@ import (
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/utils"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
+	"github.com/OPPOGROUP/protocol/hoyolib_pb"
 	"net/http"
 )
 
@@ -13,8 +14,11 @@ type StarRail struct {
 	client
 }
 
-func NewStarRailClient(oversea bool, accountId, cookieToken string) (Client, error) {
-	c := &StarRail{client{}}
+func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId, cookieToken string) (Client, error) {
+	c := &StarRail{client{
+		server: server,
+		game:   hoyolib_pb.GameType_StarRail,
+	}}
 	var err error
 	var (
 		accountApi     string
@@ -23,14 +27,16 @@ func NewStarRailClient(oversea bool, accountId, cookieToken string) (Client, err
 		signInfoUrl    string
 		signUrl        string
 		accountInfoUrl string
+		oversea        bool
 	)
-	if oversea {
+	if server == hoyolib_pb.RegisterRequest_OVERSEA {
 		accountApi = "https://bbs-api-os.hoyolab.com"
 		api = "https://sg-public-api.hoyolab.com"
 		mark := "luna"
 		actId = "e202303301540311"
 		accountInfoUrl = fmt.Sprintf("%s/game_record/card/api/getGameRecordCard", accountApi)
 		signUrl, signInfoUrl = utils.GetSignUrl(api, mark)
+		oversea = true
 	} else {
 		// todo: add mainland china api
 		return nil, errors.ErrNotImplemented

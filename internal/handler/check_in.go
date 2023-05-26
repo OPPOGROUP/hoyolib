@@ -35,30 +35,30 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 		log.Error().Err(errors.ErrUserNotRegistered).Msg("Check-in request verification failed")
 		return resp, nil
 	} else {
-		for gid, c := range u.ClientsCN {
+		for gid, c := range u.Clients[hoyolib_pb.RegisterRequest_CN] {
 			err := c.CheckIn()
 			if err != nil {
-				resp.CheckInInfoCN[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+				resp.CheckInInfoCN[int32(gid)] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: false,
 					Msg:     err.Error(),
 				}
-				log.Error().Err(err).Str("server", "CN").Int32("game_id", gid).Msg("Check-in failed")
+				log.Error().Err(err).Str("server", "CN").Int32("game_id", int32(gid)).Msg("Check-in failed")
 			} else {
-				resp.CheckInInfoCN[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+				resp.CheckInInfoCN[int32(gid)] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: true,
 				}
 			}
 		}
-		for gid, c := range u.ClientsOversea {
+		for gid, c := range u.Clients[hoyolib_pb.RegisterRequest_OVERSEA] {
 			err := c.CheckIn()
 			if err != nil {
-				resp.CheckInInfoOversea[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+				resp.CheckInInfoOversea[int32(gid)] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: false,
 					Msg:     err.Error(),
 				}
-				log.Error().Err(err).Str("server", "Oversea").Int32("game_id", gid).Msg("Check-in failed")
+				log.Error().Err(err).Str("server", "Oversea").Int32("game_id", int32(gid)).Msg("Check-in failed")
 			} else {
-				resp.CheckInInfoOversea[gid] = &hoyolib_pb.CheckInResponse_CheckInStatus{
+				resp.CheckInInfoOversea[int32(gid)] = &hoyolib_pb.CheckInResponse_CheckInStatus{
 					Success: true,
 				}
 			}
@@ -81,14 +81,6 @@ func verifyCheckInRequest(req *hoyolib_pb.CheckInRequest) error {
 	}
 	if req.GetUserId() == 0 {
 		return errors.ErrInvalidUserId
-	}
-	if len(req.GetGames()) == 0 {
-		return errors.ErrEmptyGames
-	}
-	for _, g := range req.GetGames() {
-		if hoyolib_pb.GameType_name[int32(g)] == "" {
-			return errors.ErrInvalidGameType
-		}
 	}
 	return nil
 }
