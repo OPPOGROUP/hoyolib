@@ -3,7 +3,7 @@ module github.com/OPPOGROUP/hoyolib
 go 1.20
 
 require (
-	github.com/OPPOGROUP/protocol v0.1.4
+	github.com/OPPOGROUP/protocol v0.2.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/robfig/cron v1.2.0
 	github.com/rs/zerolog v1.29.1

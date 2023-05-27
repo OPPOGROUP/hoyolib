@@ -65,8 +65,8 @@ func (c *client) updateAccountInfo() error {
 		return errors.NewInternalError(r.Retcode, r.Message)
 	}
 	gameType := cte.LocalGameTypeToMihoyoGameType[c.game]
-	for _, data := range r.Data.List {
-		data := data
+	for _, d := range r.Data.List {
+		data := d
 		if data.GameId == gameType {
 			userInfo := &gameInfo{
 				GameRoleId: data.GameRoleId,
