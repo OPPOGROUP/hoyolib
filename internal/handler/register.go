@@ -7,6 +7,7 @@ import (
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/hoyolib/internal/user"
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
+	"github.com/spf13/viper"
 )
 
 func (HoyolibServer) Register(_ context.Context, req *hoyolib_pb.RegisterRequest) (*hoyolib_pb.RegisterResponse, error) {
@@ -48,11 +49,11 @@ func createUser(req *hoyolib_pb.RegisterRequest, server hoyolib_pb.RegisterReque
 	u := req.GetUserId()
 	if u == 0 {
 		u = uid
-		uid++
 	}
 	info := &user.Info{
 		AccountId:   req.AccountId,
 		CookieToken: req.CookieToken,
+		ClientNotes: make(map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]struct{}),
 		Clients:     make(map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]client.Client),
 	}
 	for _, g := range req.GetGames() {
@@ -76,16 +77,23 @@ func createUser(req *hoyolib_pb.RegisterRequest, server hoyolib_pb.RegisterReque
 			info.Clients[server] = make(map[hoyolib_pb.GameType]client.Client)
 		}
 		info.Clients[server][g] = c
+		if info.ClientNotes[server] == nil {
+			info.ClientNotes[server] = make(map[hoyolib_pb.GameType]struct{})
+		}
+		info.ClientNotes[server][g] = struct{}{}
 	}
 	m[u] = info
-	go func() {
-		err := saveUser()
-		if err != nil {
-			log.Error().Err(err).Msg("Save user failed")
-			return
-		}
-		log.Info().Msgf("Save user %d success", u)
-	}()
+	uid++
+	if viper.GetBool("data.enable") {
+		go func() {
+			err := saveUser()
+			if err != nil {
+				log.Error().Err(err).Msg("Save user failed")
+				return
+			}
+			log.Info().Msgf("Save user %d success", u)
+		}()
+	}
 	return u, nil
 }
 

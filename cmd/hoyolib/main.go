@@ -21,7 +21,9 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("log init failed")
 	}
-	handler.LoadSavedUsers()
+	if viper.GetBool("data.enable") {
+		handler.LoadSavedUsers()
+	}
 	err = event_loop.Start()
 	if err != nil {
 		log.Fatal().Err(err).Msg("event loop start failed")

@@ -1,5 +1,6 @@
 env: dev
 data:
+  enable: false
   path: ./data
 log:
   path: ./log
