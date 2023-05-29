@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/config"
+	"github.com/OPPOGROUP/hoyolib/internal/event_loop"
 	"github.com/OPPOGROUP/hoyolib/internal/handler"
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
@@ -14,15 +15,19 @@ import (
 func main() {
 	err := config.Init()
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("config init failed")
 	}
 	err = log.Init()
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("log init failed")
 	}
 	handler.LoadSavedUsers()
+	err = event_loop.Start()
+	if err != nil {
+		log.Fatal().Err(err).Msg("event loop start failed")
+	}
 	if err = startServer(); err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("start server failed")
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 
 const (
 	UserDataFile = "user.json"
+	WxApi        = "cdl.zone:11456"
 )
 
 var (

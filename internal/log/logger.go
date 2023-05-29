@@ -35,6 +35,10 @@ func Error() *zerolog.Event {
 	return logger.Error().Stack()
 }
 
+func Fatal() *zerolog.Event {
+	return logger.Fatal().Stack()
+}
+
 func Init() error {
 	level, err := zerolog.ParseLevel(viper.GetString("log.level"))
 	if err != nil {
