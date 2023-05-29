@@ -1,6 +1,10 @@
 package event_loop
 
-import "github.com/robfig/cron"
+import (
+	"github.com/OPPOGROUP/hoyolib/internal/handler"
+	"github.com/OPPOGROUP/protocol/hoyolib_pb"
+	"github.com/robfig/cron"
+)
 
 var (
 	c = cron.New()
@@ -21,7 +25,11 @@ func Start() error {
 }
 
 func autoCheckIn() {
-
+	resMap := make(map[int64]*hoyolib_pb.CheckInResponse)
+	for uid := range handler.GetUserData() {
+		resp, _ := handler.CheckInUser(uid)
+		resMap[uid] = resp
+	}
 }
 
 func updateAccountInfo() {

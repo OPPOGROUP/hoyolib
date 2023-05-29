@@ -27,10 +27,10 @@ func (HoyolibServer) CheckIn(_ context.Context, req *hoyolib_pb.CheckInRequest) 
 			},
 		}, nil
 	}
-	return checkInUser(req.GetUserId())
+	return CheckInUser(req.GetUserId())
 }
 
-func checkInUser(userid int64) (*hoyolib_pb.CheckInResponse, error) {
+func CheckInUser(userid int64) (*hoyolib_pb.CheckInResponse, error) {
 	resp := &hoyolib_pb.CheckInResponse{
 		Header: &hoyolib_pb.ResponseHeader{
 			Code:   int32(hoyolib_pb.ErrorCode_OK),

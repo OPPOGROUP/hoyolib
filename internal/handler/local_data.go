@@ -15,18 +15,22 @@ var (
 	uid int64 = 100000
 )
 
+func GetUserData() map[int64]*user.Info {
+	return m
+}
+
 func LoadSavedUsers() {
 	dir := viper.GetString("data.path")
 	if dir == "" {
 		dir = "./data"
 	}
 	filename := path.Join(dir, cte.UserDataFile)
-	userbytes, err := os.ReadFile(filename)
+	userBytes, err := os.ReadFile(filename)
 	if err != nil {
 		log.Warn().Err(err).Msg("Load local user data file failed")
 		return
 	}
-	_ = json.Unmarshal(userbytes, &m)
+	_ = json.Unmarshal(userBytes, &m)
 }
 
 func saveUser() error {
