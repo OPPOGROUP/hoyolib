@@ -118,6 +118,8 @@ func (r *Request) Do() (*http.Response, error) {
 	if r.payloads != nil {
 		payloads, _ := json.Marshal(r.payloads)
 		pReader = bytes.NewReader(payloads)
+	} else {
+		pReader = bytes.NewReader([]byte{})
 	}
 	req, err := http.NewRequest(r.method, r.url.String(), pReader)
 	if err != nil {
