@@ -7,6 +7,7 @@ import (
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"net/http"
 	"net/http/cookiejar"
+	"net/http/httputil"
 	"net/url"
 	"time"
 )
@@ -111,7 +112,6 @@ func (r *Request) transformCookies() *cookiejar.Jar {
 }
 
 func (r *Request) Do() (*http.Response, error) {
-	log.Debug().Msgf("[http request] request = %+v", r)
 	var (
 		pReader *bytes.Reader
 	)
@@ -132,6 +132,8 @@ func (r *Request) Do() (*http.Response, error) {
 			q.Add(key, value)
 		}
 	}
+	dumpReq, _ := httputil.DumpRequest(req, true)
+	log.Debug().Msgf("[http request] request: %s", string(dumpReq))
 	resp, err := r.client.Do(req)
 	if err != nil {
 		log.Error().Err(err).Msgf("[http request] send request error")

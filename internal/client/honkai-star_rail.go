@@ -28,6 +28,7 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		signUrl        string
 		accountInfoUrl string
 		oversea        bool
+		cookies        map[string]string
 	)
 	if server == hoyolib_pb.RegisterRequest_OVERSEA {
 		accountApi = "https://bbs-api-os.hoyolab.com"
@@ -37,6 +38,10 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		accountInfoUrl = fmt.Sprintf("%s/game_record/card/api/getGameRecordCard", accountApi)
 		signUrl, signInfoUrl = utils.GetSignUrl(api, mark)
 		oversea = true
+		cookies = map[string]string{
+			"account_id":   accountId,
+			"cookie_token": cookieToken,
+		}
 	} else {
 		// todo: add mainland china api
 		return nil, errors.ErrNotImplemented
@@ -45,10 +50,7 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		request.WithMethod(http.MethodGet),
 		request.WithUrl(accountInfoUrl),
 		request.WithHeaders(cte.GetHeaders(oversea)),
-		request.WithCookies(map[string]string{
-			"account_id":   accountId,
-			"cookie_token": cookieToken,
-		}),
+		request.WithCookies(cookies),
 		request.WithParams(map[string]string{
 			"uid": accountId,
 		}),
@@ -60,10 +62,7 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		request.WithMethod(http.MethodGet),
 		request.WithUrl(signInfoUrl),
 		request.WithHeaders(cte.GetHeaders(oversea)),
-		request.WithCookies(map[string]string{
-			"account_id":   accountId,
-			"cookie_token": cookieToken,
-		}),
+		request.WithCookies(cookies),
 		request.WithParams(map[string]string{
 			"act_id": actId,
 			"lang":   "zh-cn",
@@ -76,10 +75,7 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		request.WithMethod(http.MethodPost),
 		request.WithUrl(signUrl),
 		request.WithHeaders(cte.GetHeaders(oversea)),
-		request.WithCookies(map[string]string{
-			"account_id":   accountId,
-			"cookie_token": cookieToken,
-		}),
+		request.WithCookies(cookies),
 		request.WithPayloads(map[string]interface{}{
 			"act_id": actId,
 			"lang":   "zh-cn",
