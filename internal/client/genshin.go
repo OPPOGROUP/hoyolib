@@ -53,6 +53,9 @@ func NewGenshinClient(server hoyolib_pb.RegisterRequest_AccountType, accountId, 
 			"uid": accountId,
 		}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	err = c.updateAccountInfo()
 	if err != nil {
 		return nil, err
