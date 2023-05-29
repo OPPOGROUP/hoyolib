@@ -41,6 +41,10 @@ func Start() error {
 }
 
 func autoCheckIn() {
+	if len(handler.GetUserData()) == 0 {
+		log.Info().Msg("no user data, skip auto checkin")
+		return
+	}
 	checkInResults := make([]*hoyolib_pb.CheckInResponse, 0, len(handler.GetUserData()))
 	log.Debug().Any("user_data", handler.GetUserData()).Msg("autoCheckIn user data")
 	for uid := range handler.GetUserData() {
