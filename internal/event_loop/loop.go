@@ -37,7 +37,6 @@ func Start() error {
 	c.Start()
 	log.Info().Msg("event loop start")
 	log.Debug().Msgf("event loop entries: %v", c.Entries())
-	defer c.Stop()
 	return nil
 }
 
