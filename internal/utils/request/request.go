@@ -121,16 +121,16 @@ func (r *Request) Do() (*http.Response, error) {
 	} else {
 		pReader = bytes.NewReader([]byte{})
 	}
+	if r.params != nil {
+		q := r.url.Query()
+		for key, value := range r.params {
+			q.Add(key, value)
+		}
+	}
 	req, err := http.NewRequest(r.method, r.url.String(), pReader)
 	if err != nil {
 		log.Error().Err(err).Msgf("[http request] build request error")
 		return nil, errors.ErrBuildRequest
-	}
-	if r.params != nil {
-		q := req.URL.Query()
-		for key, value := range r.params {
-			q.Add(key, value)
-		}
 	}
 	dumpReq, _ := httputil.DumpRequest(req, true)
 	log.Debug().Msgf("[http request] request: %s", string(dumpReq))
