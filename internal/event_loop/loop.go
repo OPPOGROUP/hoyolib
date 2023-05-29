@@ -31,7 +31,7 @@ func Start() error {
 	if !enable {
 		return errors.ErrGrpcClientInitFailed
 	}
-	_, _ = c.AddFunc("@every 10m", autoCheckIn)
+	_, _ = c.AddFunc("@every 10s", autoCheckIn)
 	//_, _ = c.AddFunc("@hourly", updateAccountInfo)
 
 	c.Start()
@@ -43,6 +43,7 @@ func Start() error {
 
 func autoCheckIn() {
 	checkInResults := make([]*hoyolib_pb.CheckInResponse, 0, len(handler.GetUserData()))
+	log.Debug().Any("user_data", handler.GetUserData()).Msg("autoCheckIn user data")
 	for uid := range handler.GetUserData() {
 		resp, _ := handler.CheckInUser(uid)
 		checkInResults = append(checkInResults, resp)
