@@ -31,7 +31,7 @@ func Start() error {
 	if !enable {
 		return errors.ErrGrpcClientInitFailed
 	}
-	_, _ = c.AddFunc("@every 10s", autoCheckIn)
+	_, _ = c.AddFunc("@every 20s", autoCheckIn)
 	//_, _ = c.AddFunc("@hourly", updateAccountInfo)
 
 	c.Start()
@@ -52,6 +52,7 @@ func autoCheckIn() {
 	}
 	log.Debug().Msgf("[grpc] checkin results request: %v", req)
 	resp, err := client.PushCheckinResults(context.Background(), req)
+	log.Debug().Msgf("[grpc] checkin results response: %v", resp)
 	if err != nil {
 		log.Error().Err(err).Msg("[grpc] push checkin results failed")
 		return
