@@ -31,7 +31,7 @@ func Start() error {
 	if !enable {
 		return errors.ErrGrpcClientInitFailed
 	}
-	_, _ = c.AddFunc("@every 20s", autoCheckIn)
+	_, _ = c.AddFunc("@every 1m", autoCheckIn)
 	//_, _ = c.AddFunc("@hourly", updateAccountInfo)
 
 	c.Start()
