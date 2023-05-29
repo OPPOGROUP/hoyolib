@@ -31,6 +31,7 @@ func LoadSavedUsers() {
 		return
 	}
 	_ = json.Unmarshal(userBytes, &m)
+	log.Info().Any("user data", m).Msg("Load local user data file success")
 }
 
 func saveUser() error {
