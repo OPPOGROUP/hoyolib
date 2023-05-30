@@ -126,18 +126,21 @@ func (r *Request) Do() (*http.Response, error) {
 		for key, value := range r.params {
 			q.Add(key, value)
 		}
+		r.url.RawQuery = q.Encode()
 	}
 	req, err := http.NewRequest(r.method, r.url.String(), pReader)
 	if err != nil {
 		log.Error().Err(err).Msgf("[http request] build request error")
 		return nil, errors.ErrBuildRequest
 	}
-	dumpReq, _ := httputil.DumpRequest(req, true)
+	dumpReq, _ := httputil.DumpRequestOut(req, true)
 	log.Debug().Msgf("[http request] request: %s", string(dumpReq))
 	resp, err := r.client.Do(req)
 	if err != nil {
 		log.Error().Err(err).Msgf("[http request] send request error")
 		return nil, errors.ErrSendRequest
 	}
+	dumpResp, _ := httputil.DumpResponse(resp, true)
+	log.Debug().Msgf("[http request] response: %s", string(dumpResp))
 	return resp, nil
 }
