@@ -44,6 +44,9 @@ func LoadSavedUsers() {
 			}
 		}
 	}
+	for m[uid] != nil {
+		uid++
+	}
 	log.Info().Any("user data", m).Msg("Load local user data file success")
 }
 
