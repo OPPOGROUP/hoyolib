@@ -6,12 +6,13 @@ import (
 )
 
 type Info struct {
-	Active bool                                              `json:"-"`
-	Msg    string                                            `json:"-"`
-	Infos  map[hoyolib_pb.RegisterRequest_AccountType]*_info `json:"infos"`
+	Uid   int64                                                  `json:"uid"`
+	Infos map[hoyolib_pb.RegisterRequest_AccountType]*ServerInfo `json:"infos"`
 }
 
-type _info struct {
+type ServerInfo struct {
+	Active      bool                                  `json:"-"`
+	Msg         string                                `json:"-"`
 	AccountId   string                                `json:"account_id"`
 	CookieToken string                                `json:"cookie_token"`
 	ClientNotes []hoyolib_pb.GameType                 `json:"client_notes"`
@@ -30,20 +31,20 @@ func (i *Info) CreateClients(server hoyolib_pb.RegisterRequest_AccountType) erro
 		case hoyolib_pb.GameType_Genshin:
 			c, err = client.NewGenshinClient(server, info.AccountId, info.CookieToken)
 			if err != nil {
-				i.Active = false
-				i.Msg = err.Error()
+				info.Active = false
+				info.Msg = err.Error()
 				return err
 			}
 		case hoyolib_pb.GameType_StarRail:
 			c, err = client.NewStarRailClient(server, info.AccountId, info.CookieToken)
 			if err != nil {
-				i.Active = false
-				i.Msg = err.Error()
+				info.Active = false
+				info.Msg = err.Error()
 				return err
 			}
 		}
 		info.Clients[g] = c
 	}
-	i.Active = true
+	info.Active = true
 	return nil
 }

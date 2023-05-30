@@ -31,6 +31,19 @@ func LoadSavedUsers() {
 		return
 	}
 	_ = json.Unmarshal(userBytes, &m)
+
+	for _, uInfo := range m {
+		for server := range uInfo.Infos {
+			err = uInfo.CreateClients(server)
+			if err != nil {
+				log.Error().Err(err).
+					Int64("uid", uInfo.Uid).
+					Str("server", server.String()).
+					Msg("Create clients failed")
+				continue
+			}
+		}
+	}
 	log.Info().Any("user data", m).Msg("Load local user data file success")
 }
 

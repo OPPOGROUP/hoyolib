@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"github.com/OPPOGROUP/hoyolib/internal/client"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/hoyolib/internal/user"
@@ -50,37 +49,21 @@ func createUser(req *hoyolib_pb.RegisterRequest, server hoyolib_pb.RegisterReque
 	if u == 0 {
 		u = uid
 	}
-	info := &user.Info{
-		AccountId:   req.AccountId,
-		CookieToken: req.CookieToken,
-		ClientNotes: make(map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]struct{}),
-		Clients:     make(map[hoyolib_pb.RegisterRequest_AccountType]map[hoyolib_pb.GameType]client.Client),
+	info := m[u]
+	if info == nil {
+		info = &user.Info{}
 	}
-	for _, g := range req.GetGames() {
-		var (
-			c   client.Client
-			err error
-		)
-		switch g {
-		case hoyolib_pb.GameType_Genshin:
-			c, err = client.NewGenshinClient(server, req.AccountId, req.CookieToken)
-			if err != nil {
-				return 0, err
-			}
-		case hoyolib_pb.GameType_StarRail:
-			c, err = client.NewStarRailClient(server, req.AccountId, req.CookieToken)
-			if err != nil {
-				return 0, err
-			}
-		}
-		if info.Clients[server] == nil {
-			info.Clients[server] = make(map[hoyolib_pb.GameType]client.Client)
-		}
-		info.Clients[server][g] = c
-		if info.ClientNotes[server] == nil {
-			info.ClientNotes[server] = make(map[hoyolib_pb.GameType]struct{})
-		}
-		info.ClientNotes[server][g] = struct{}{}
+
+	si := &user.ServerInfo{
+		AccountId:   req.GetAccountId(),
+		CookieToken: req.GetCookieToken(),
+		ClientNotes: req.GetGames(),
+	}
+	info.Infos[server] = si
+
+	err := info.CreateClients(server)
+	if err != nil {
+		return 0, err
 	}
 	m[u] = info
 	uid++
