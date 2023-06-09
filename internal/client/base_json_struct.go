@@ -31,6 +31,14 @@ type AccountInfoResponse struct {
 	Retcode int    `json:"retcode"`
 	Message string `json:"message"`
 	Data    struct {
+		List []accountInfo `json:"list"`
+	} `json:"data"`
+}
+
+type GameInfoResponse struct {
+	Retcode int    `json:"retcode"`
+	Message string `json:"message"`
+	Data    struct {
 		List []struct {
 			HasRole         bool   `json:"has_role"`
 			GameId          int    `json:"game_id"`
@@ -54,12 +62,15 @@ type AccountInfoResponse struct {
 	} `json:"data"`
 }
 
-type gameInfo struct {
-	GameRoleId string
-	Region     string
-	Nickname   string
-	Level      int
-	Data       []data
+type accountInfo struct {
+	GameBiz    string `json:"game_biz"`
+	Region     string `json:"region"`
+	GameUid    string `json:"game_uid"`
+	Nickname   string `json:"nickname"`
+	Level      int    `json:"level"`
+	IsChosen   bool   `json:"is_chosen"`
+	RegionName string `json:"region_name"`
+	IsOfficial bool   `json:"is_official"`
 }
 
 type data struct {

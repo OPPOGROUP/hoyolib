@@ -1,10 +1,8 @@
 package client
 
 import (
-	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/cte"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
-	"github.com/OPPOGROUP/hoyolib/internal/utils"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
 	"github.com/OPPOGROUP/protocol/hoyolib_pb"
 	"net/http"
@@ -21,27 +19,30 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 	}}
 	var err error
 	var (
-		accountApi     string
-		api            string
-		actId          string
-		signInfoUrl    string
+		//accountApi     string
+		api   string
+		actId string
+		//signInfoUrl    string
 		signUrl        string
 		accountInfoUrl string
 		oversea        bool
 		cookies        map[string]string
+		gameBiz        string
 	)
 	if server == hoyolib_pb.RegisterRequest_OVERSEA {
-		accountApi = "https://bbs-api-os.hoyolab.com"
+		//accountApi = "https://bbs-api-os.hoyolab.com"
 		api = "https://sg-public-api.hoyolab.com"
 		mark := "luna"
 		actId = "e202303301540311"
-		accountInfoUrl = fmt.Sprintf("%s/game_record/card/api/getGameRecordCard", accountApi)
-		signUrl, signInfoUrl = utils.GetSignUrl(api, mark)
+		accountInfoUrl, signUrl = c.generateApi(api, mark)
 		oversea = true
 		cookies = map[string]string{
 			"account_id":   accountId,
 			"cookie_token": cookieToken,
+			"ltoken":       cookieToken,
+			"ltuid":        accountId,
 		}
+		gameBiz = "hkrpg_global"
 	} else {
 		// todo: add mainland china api
 		return nil, errors.ErrNotImplemented
@@ -52,22 +53,13 @@ func NewStarRailClient(server hoyolib_pb.RegisterRequest_AccountType, accountId,
 		request.WithHeaders(cte.GetHeaders(oversea)),
 		request.WithCookies(cookies),
 		request.WithParams(map[string]string{
-			"uid": accountId,
+			"game_biz": gameBiz,
 		}),
 	)
 	if err != nil {
 		return nil, err
 	}
-	c.signInfoRequest, err = request.NewRequest(
-		request.WithMethod(http.MethodGet),
-		request.WithUrl(signInfoUrl),
-		request.WithHeaders(cte.GetHeaders(oversea)),
-		request.WithCookies(cookies),
-		request.WithParams(map[string]string{
-			"act_id": actId,
-			"lang":   "zh-cn",
-		}),
-	)
+	err = c.updateAccountInfo()
 	if err != nil {
 		return nil, err
 	}

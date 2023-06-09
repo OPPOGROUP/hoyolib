@@ -2,7 +2,7 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/OPPOGROUP/hoyolib/internal/cte"
+	"fmt"
 	"github.com/OPPOGROUP/hoyolib/internal/errors"
 	"github.com/OPPOGROUP/hoyolib/internal/log"
 	"github.com/OPPOGROUP/hoyolib/internal/utils/request"
@@ -15,7 +15,7 @@ type Client interface {
 }
 
 type client struct {
-	userInfo           *gameInfo
+	userInfo           *accountInfo
 	server             hoyolib_pb.RegisterRequest_AccountType
 	game               hoyolib_pb.GameType
 	accountInfoRequest *request.Request
@@ -64,20 +64,13 @@ func (c *client) updateAccountInfo() error {
 	if r.Retcode != 0 {
 		return errors.NewInternalError(r.Retcode, r.Message)
 	}
-	gameType := cte.LocalGameTypeToMihoyoGameType[c.game]
-	for _, d := range r.Data.List {
-		data := d
-		if data.GameId == gameType {
-			userInfo := &gameInfo{
-				GameRoleId: data.GameRoleId,
-				Region:     data.Region,
-				Nickname:   data.Nickname,
-				Level:      data.Level,
-				Data:       data.Data,
-			}
-			c.userInfo = userInfo
-			break
-		}
-	}
+	c.userInfo = &r.Data.List[0]
+
 	return nil
+}
+
+func (c *client) generateApi(api, mark string) (accountInfoUrl string, signUrl string) {
+	accountInfoUrl = fmt.Sprintf("%s/binding/api/getUserGameRolesByCookie", api)
+	signUrl = fmt.Sprintf("%s/event/%s/sign", api, mark)
+	return
 }
